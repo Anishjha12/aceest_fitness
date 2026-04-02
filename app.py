@@ -1,51 +1,54 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import sqlite3
+import os
 
 app = Flask(__name__)
 DB_NAME = "aceest_fitness.db"
 
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cur = conn.cursor()
-    # Recreating the core gym database structure
-    cur.execute("CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY, name TEXT, program TEXT)")
-    cur.execute("INSERT OR IGNORE INTO clients (id, name, program) VALUES (1, 'Admin User', 'Elite Muscle Gain')")
-    conn.commit()
-    conn.close()    
-
+# ---------- DATABASE HELPER ----------
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
-    # Ensure table exists every time we connect (safe for SQLite)
-    conn.execute("CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY, name TEXT, program TEXT)")
+    conn.row_factory = sqlite3.Row
     return conn
 
-@app.route('/members')
-def get_members():
-    conn = get_db_connection() # Use the helper instead of raw connect
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM clients")
-    rows = cur.fetchall()
+def init_db():
+    conn = get_db_connection()
+    # Users Table
+    conn.execute("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, role TEXT)")
+    # Clients Table
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS clients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            program TEXT,
+            membership_status TEXT
+        )
+    """)
+    # Add default data for tests
+    conn.execute("INSERT OR IGNORE INTO users VALUES ('admin', 'Admin')")
+    conn.execute("INSERT OR IGNORE INTO clients (name, program, membership_status) VALUES ('Test User', 'Muscle Gain', 'Active')")
+    conn.commit()
     conn.close()
-    return jsonify([{"id": r[0], "name": r[1], "program": r[2]} for r in rows])
+
+# ---------- WEB ROUTES (API) ----------
 
 @app.route('/')
 def home():
-    return jsonify({"message": "Welcome to ACEest Fitness Web API"})
+    return jsonify({"message": "ACEest Fitness API Online", "version": "3.2.4"})
 
 @app.route('/status')
 def status():
-    # REQUIRED for your Jenkins/GitHub Actions health checks
-    return jsonify({"status": "Healthy", "version": "3.2.4"})
+    """Health check endpoint for Jenkins/GitHub Actions"""
+    return jsonify({"status": "Healthy", "database": "Connected"})
 
-@app.route('/members')
+@app.route('/members', methods=['GET'])
 def get_members():
-    conn = sqlite3.connect(DB_NAME)
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM clients")
-    rows = cur.fetchall()
+    conn = get_db_connection()
+    members = conn.execute("SELECT * FROM clients").fetchall()
     conn.close()
-    return jsonify([{"id": r[0], "name": r[1], "program": r[2]} for r in rows])
+    return jsonify([dict(row) for row in members])
 
 if __name__ == "__main__":
     init_db()
+    # Use 0.0.0.0 for Docker compatibility
     app.run(host='0.0.0.0', port=5000)

@@ -1,0 +1,21 @@
+name: ACEest Fitness CI
+
+[cite_start]on: [push, pull_request] [cite: 22]
+
+jobs:
+  devops-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - [cite_start]name: Build & Lint [cite: 23]
+        run: |
+          pip install flake8
+          flake8 . --count --select=E9,F63,F7,F82 --statistics
+
+      - [cite_start]name: Docker Image Assembly [cite: 24]
+        run: docker build -t aceest-gym:latest .
+
+      - [cite_start]name: Automated Testing [cite: 25]
+        run: docker run aceest-gym:latest pytest

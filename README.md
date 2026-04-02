@@ -81,3 +81,4 @@ Configured in `.github/workflows/main.yml`, this pipeline triggers on every **Pu
 The **Jenkins** environment handles the final assembly and delivery on the local build server.
 * **Trigger:** Jenkins monitors the repository and triggers a build once GitHub Actions reports a "Success."
 * **Action:** It pulls the verified code, builds the production-grade Docker image using `python:3.9-slim` for maximum efficiency, and prepares it for deployment.
+<img width="1895" height="945" alt="image" src="https://github.com/user-attachments/assets/1fbbbd33-6aee-4142-b135-cbc367807e00" />

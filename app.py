@@ -11,7 +11,7 @@ def init_db():
     cur.execute("CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY, name TEXT, program TEXT)")
     cur.execute("INSERT OR IGNORE INTO clients (id, name, program) VALUES (1, 'Admin User', 'Elite Muscle Gain')")
     conn.commit()
-    conn.close()
+    conn.close()    
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)

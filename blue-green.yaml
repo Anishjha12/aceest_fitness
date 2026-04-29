@@ -1,0 +1,99 @@
+# ──────────────────────────────────────────────────────────────
+# Blue-Green Deployment Strategy
+# How it works:
+#   1. Blue (v1) is live.  Green (v2) is deployed alongside.
+#   2. Run smoke tests against Green service.
+#   3. Switch the main Service selector from blue → green.
+#   4. Blue stays up for instant rollback; delete when confirmed.
+# ──────────────────────────────────────────────────────────────
+
+# ── Blue Deployment (current stable version) ──────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-blue
+  namespace: aceest
+  labels:
+    app: aceest-fitness
+    slot: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      slot: blue
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        slot: blue
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: <anishjha12>/aceest-fitness:1.0.0
+          ports:
+            - containerPort: 5000
+
+---
+# ── Green Deployment (new version being released) ─────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-green
+  namespace: aceest
+  labels:
+    app: aceest-fitness
+    slot: green
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aceest-fitness
+      slot: green
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness
+        slot: green
+    spec:
+      containers:
+        - name: aceest-fitness
+          image: <anishjha12>/aceest-fitness:2.0.0
+          ports:
+            - containerPort: 5000
+
+---
+# ── Production Service (switch selector to flip traffic) ───────
+# To go live with Green: kubectl patch svc aceest-fitness-prod
+#   -n aceest -p '{"spec":{"selector":{"slot":"green"}}}'
+# Rollback to Blue:       kubectl patch svc aceest-fitness-prod
+#   -n aceest -p '{"spec":{"selector":{"slot":"blue"}}}'
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-prod
+  namespace: aceest
+spec:
+  selector:
+    app: aceest-fitness
+    slot: blue          # <-- change to green to flip traffic
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: LoadBalancer
+
+---
+# ── Green-only Service (for smoke/pre-release testing) ────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-green-svc
+  namespace: aceest
+spec:
+  selector:
+    app: aceest-fitness
+    slot: green
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: ClusterIP

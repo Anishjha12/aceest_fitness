@@ -1,4 +1,9 @@
-from flask import Flask, jsonify, request, abort
+"""
+ACEest Fitness & Gym Management System
+Flask Application - Version 1.0.0
+"""
+
+from flask import Flask, jsonify, request, abort # type: ignore
 from datetime import datetime
 
 app = Flask(__name__)

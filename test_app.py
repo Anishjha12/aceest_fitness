@@ -1,5 +1,9 @@
+"""
+Unit Tests for ACEest Fitness & Gym Management System
+Uses pytest + Flask test client
+"""
 
-import pytest
+import pytest # type: ignore
 import json
 import sys
 import os

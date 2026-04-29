@@ -10,8 +10,8 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "app"))
 
-import ACEest_Fitness as app_module # type: ignore
-from ACEest_Fitness import app # type: ignore
+import app.ACEest_Fitness as app_module
+from app.ACEest_Fitness import app
 
 
 # ──────────────────────────────────────────────────────────────

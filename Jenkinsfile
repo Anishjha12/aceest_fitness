@@ -25,8 +25,6 @@ pipeline {
         stage("Setup Environment") {
     steps {
         bat """
-            C:\\Users\\Anish\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m venv venv
-            call venv\\Scripts\\activate.bat
             python -m pip install --upgrade pip
             pip install -r requirements.txt
         """
@@ -35,18 +33,17 @@ pipeline {
 
         // ── 3. Unit Tests + Coverage ───────────────────────────
         stage("Unit Tests") {
-            steps {
-                bat """
-                    call venv\\Scripts\\activate.bat
-                    pytest tests/ --cov=app --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junitxml=test-results.xml -v
-                """
-            }
-            post {
-                always {
-                    junit "test-results.xml"
-                }
-            }
+    steps {
+        bat """
+            pytest tests/ --cov=app --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junitxml=test-results.xml -v
+        """
+    }
+    post {
+        always {
+            junit "test-results.xml"
         }
+    }
+}
 
         // ── 4. SonarQube Analysis ──────────────────────────────
         stage("SonarQube Analysis") {

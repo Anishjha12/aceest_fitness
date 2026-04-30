@@ -118,14 +118,15 @@ stage("Unit Tests") {
 
         // ── 9. Smoke Test ──────────────────────────────────────
         stage("Smoke Test") {
-            steps {
-                bat """
-                    timeout /t 10 /nobreak
-                    curl -f http://localhost:5000/ || exit 1
-                    echo Smoke test passed
-                """
-            }
-        }
+    steps {
+        bat """
+            for /f "tokens=*" %%i in ('minikube service aceest-fitness-service --namespace=aceest --url') do set SERVICE_URL=%%i
+            echo Service URL: http://127.0.0.1:60830/
+            curl -f http://127.0.0.1:60830/ || exit 1
+            echo Smoke test passed
+        """
+    }
+}
     }
 
     post {

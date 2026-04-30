@@ -23,15 +23,15 @@ pipeline {
 
         // ── 2. Setup Python Environment ────────────────────────
         stage("Setup Environment") {
-            steps {
-                bat """
-                    python -m venv venv
-                    call venv\\Scripts\\activate.bat
-                    python -m pip install --upgrade pip
-                    pip install -r requirements.txt
-                """
-            }
-        }
+    steps {
+        bat """
+            C:\\Users\\Anish\\AppData\\Local\\Programs\\Python\\Python311\\python.exe -m venv venv
+            call venv\\Scripts\\activate.bat
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+        """
+    }
+}
 
         // ── 3. Unit Tests + Coverage ───────────────────────────
         stage("Unit Tests") {

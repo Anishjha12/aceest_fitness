@@ -32,9 +32,10 @@ pipeline {
 }
 
         // ── 3. Unit Tests + Coverage ───────────────────────────
-        stage("Unit Tests") {
+stage("Unit Tests") {
     steps {
         bat """
+            set PYTHONPATH=%CD%
             pytest tests/ --cov=app --cov-report=xml:coverage.xml --cov-report=html:htmlcov --junitxml=test-results.xml -v
         """
     }

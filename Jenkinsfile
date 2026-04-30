@@ -47,24 +47,27 @@ stage("Unit Tests") {
 }
 
         // ── 4. SonarQube Analysis ──────────────────────────────
-        stage("SonarQube Analysis") {
-            environment {
-                SONAR_TOKEN = credentials("sonar-token")
-            }
-            steps {
-                withSonarQubeEnv("SonarQube") {
-                    bat """
-                        sonar-scanner.bat ^
-                            -Dsonar.projectKey=%SONAR_PROJECT% ^
-                            -Dsonar.projectName="ACEest Fitness" ^
-                            -Dsonar.sources=app ^
-                            -Dsonar.tests=tests ^
-                            -Dsonar.python.coverage.reportPaths=coverage.xml ^
-                            -Dsonar.python.version=3.11
-                    """
-                }
+      stage("SonarQube Analysis") {
+    environment {
+        SONAR_TOKEN = credentials("sonar-token")
+    }
+    steps {
+        withSonarQubeEnv("SonarQube") {
+            script {
+                def scannerHome = tool "SonarScanner"
+                bat """
+                    "${scannerHome}\\bin\\sonar-scanner.bat" ^
+                        -Dsonar.projectKey=%SONAR_PROJECT% ^
+                        -Dsonar.projectName="ACEest Fitness" ^
+                        -Dsonar.sources=app ^
+                        -Dsonar.tests=tests ^
+                        -Dsonar.python.coverage.reportPaths=coverage.xml ^
+                        -Dsonar.python.version=3.11
+                """
             }
         }
+    }
+}
 
         // ── 5. Quality Gate ────────────────────────────────────
         stage("Quality Gate") {
